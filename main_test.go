@@ -6,7 +6,7 @@ import (
 
 	acmetest "github.com/cert-manager/cert-manager/test/acme"
 
-	"github.com/cskwrd/cert-manager-webhook-porkbun/example"
+	"github.com/cskwrd/cert-manager-webhook-porkbun/porkbun"
 )
 
 var (
@@ -26,7 +26,7 @@ func TestRunsSuite(t *testing.T) {
 	//	acmetest.SetManifestPath("testdata/my-custom-solver"),
 	//	acmetest.SetBinariesPath("_test/kubebuilder/bin"),
 	//)
-	solver := example.New("59351")
+	solver := porkbun.New("59351")
 	fixture := acmetest.NewFixture(solver,
 		acmetest.SetResolvedZone("example.com."),
 		acmetest.SetManifestPath("testdata/my-custom-solver"),
