@@ -36,7 +36,9 @@ webhook to complete ACME challenge validations and obtain certificates.
 To make the set up of these webhook's easier, we provide a template repository
 that can be used to get started quickly.
 
-### Creating your own repository
+### Environment Setup
+1. Install make (version 4.4.1)
+1. Install go (version 1.24.0)
 
 ### Running the test suite
 
@@ -46,7 +48,7 @@ else they will have undetermined behaviour when used with cert-manager.
 **It is essential that you configure and run the test suite when creating a
 DNS01 webhook.**
 
-An example Go test file has been provided in [main_test.go](https://github.com/cert-manager/webhook-example/blob/master/main_test.go).
+An example Go test file has been provided in [main_test.go](https://github.com/cskwrd/cert-manager-webhook-porkbun/blob/master/main_test.go).
 
 You can run the test suite with:
 
