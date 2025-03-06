@@ -1,4 +1,4 @@
-module github.com/cert-manager/webhook-example
+module github.com/cskwrd/cert-manager-webhook-porkbun
 
 go 1.22.0
 
