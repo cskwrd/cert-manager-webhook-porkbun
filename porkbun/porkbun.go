@@ -131,11 +131,13 @@ func (p *porkbunSolver) CleanUp(ch *v1alpha1.ChallengeRequest) error {
 
 	cfg, err := unmarshalConfig(ch.Config)
 	if err != nil {
+		klog.Error("Unable to unmarshal ChallengeRequest config")
 		return err
 	}
 
 	apiClient, err := p.createPorkbunApiClient(cfg, ch.ResourceNamespace)
 	if err != nil {
+		klog.Error("Unable to create Porkbun API client")
 		return err
 	}
 
@@ -143,6 +145,7 @@ func (p *porkbunSolver) CleanUp(ch *v1alpha1.ChallengeRequest) error {
 	name := strings.TrimSuffix(ch.ResolvedFQDN, ".")
 	records, err := apiClient.RetrieveRecords(context.Background(), domain)
 	if err != nil {
+		klog.Errorf("Unable to retrieve Porkbun DNS records for '%s'", domain)
 		return err
 	}
 
@@ -150,12 +153,14 @@ func (p *porkbunSolver) CleanUp(ch *v1alpha1.ChallengeRequest) error {
 		if record.Type == "TXT" && record.Name == name && record.Content == ch.Key {
 			id, err := strconv.ParseInt(record.ID, 10, 32)
 			if err != nil {
+				klog.Errorf("Unable to parse record.ID for '%s'", record.ID)
 				return err
 			}
 
 			record.Content = ch.Key
 			err = apiClient.DeleteRecord(context.Background(), domain, int(id))
 			if err != nil {
+				klog.Errorf("Unable to delete record for '%s#%v'", domain, id)
 				return err
 			}
 
@@ -179,7 +184,7 @@ func (p *porkbunSolver) CleanUp(ch *v1alpha1.ChallengeRequest) error {
 // The stopCh can be used to handle early termination of the webhook, in cases
 // where a SIGTERM or similar signal is sent to the webhook process.
 func (p *porkbunSolver) Initialize(kubeClientConfig *rest.Config, stopCh <-chan struct{}) error {
-	klog.Info("Initializing")
+	klog.Info("Initializing webhook solver")
 
 	cl, err := kubernetes.NewForConfig(kubeClientConfig)
 	if err != nil {
@@ -208,17 +213,22 @@ func NewFromFakeObjects(kubeClient kubernetes.Interface, porkbunApiClient *porkb
 func (p *porkbunSolver) createPorkbunApiClient(cfg porkbunSolverConfig, resourceNamespace string) (*porkbunapi.Client, error) {
 	apiKey, err := p.fromSecretRef(cfg.ApiKeySecretRef, resourceNamespace)
 	if err != nil {
+		klog.Error("Unable to parse apiKey from apiKeySecretRef")
 		return nil, err
 	}
 
 	secretKey, err := p.fromSecretRef(cfg.SecretKeySecretRef, resourceNamespace)
 	if err != nil {
+		klog.Error("Unable to parse secretKey from secretKeySecretRef")
 		return nil, err
 	}
 
 	if !p.isUnitTest {
+		klog.Info("Creating Porkbun API client")
 		return porkbunapi.New(apiKey, secretKey), nil
 	}
+
+	klog.Warning("Using Porkbun API client mock")
 	return p.pbClient, nil
 }
 
@@ -227,6 +237,7 @@ func (p *porkbunSolver) fromSecretRef(secretKeySelector corev1.SecretKeySelector
 
 	secret, err := p.kubernetesClientset.CoreV1().Secrets(resourceNamespace).Get(context.Background(), secretName, metav1.GetOptions{})
 	if err != nil {
+		klog.Errorf("Unable to unable to get secret '%s'", secretName)
 		return "", err
 	}
 
@@ -234,6 +245,7 @@ func (p *porkbunSolver) fromSecretRef(secretKeySelector corev1.SecretKeySelector
 
 	bytes, ok := secret.Data[keyInSecret]
 	if !ok {
+		klog.Errorf("Unable to unable to get secret '%s'", keyInSecret)
 		return "", err
 	}
 
