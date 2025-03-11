@@ -1,0 +1,10 @@
+{
+    "apiKeySecretRef": {
+        "name": "porkbun-secret",
+        "key": "api-key"
+    },
+    "secretKeySecretRef": {
+        "name": "porkbun-secret",
+        "key": "secret-key"
+    }
+}
