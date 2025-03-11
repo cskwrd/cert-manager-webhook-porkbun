@@ -78,11 +78,13 @@ func (p *porkbunSolver) Present(ch *v1alpha1.ChallengeRequest) error {
 
 	cfg, err := unmarshalConfig(ch.Config)
 	if err != nil {
+		klog.Error("Unable to unmarshal ChallengeRequest config")
 		return err
 	}
 
 	apiClient, err := p.createPorkbunApiClient(cfg, ch.ResourceNamespace)
 	if err != nil {
+		klog.Error("Unable to create Porkbun API client")
 		return err
 	}
 
@@ -92,6 +94,7 @@ func (p *porkbunSolver) Present(ch *v1alpha1.ChallengeRequest) error {
 
 	records, err := apiClient.RetrieveRecords(context.Background(), domain)
 	if err != nil {
+		klog.Errorf("Unable to retrieve Porkbun DNS records for '%s'", domain)
 		return err
 	}
 
@@ -109,6 +112,7 @@ func (p *porkbunSolver) Present(ch *v1alpha1.ChallengeRequest) error {
 		TTL:     "60",
 	})
 	if err != nil {
+		klog.Errorf("Unable to create Porkbun TXT record for '%s'", entity)
 		return err
 	}
 
