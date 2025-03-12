@@ -225,7 +225,7 @@ func (p *porkbunSolver) createPorkbunApiClient(cfg porkbunSolverConfig, resource
 
 	if !p.isUnitTest {
 		klog.Info("Creating Porkbun API client")
-		return porkbunapi.New(apiKey, secretKey), nil
+		return porkbunapi.New(secretKey, apiKey), nil
 	}
 
 	klog.Warning("Using Porkbun API client mock")
